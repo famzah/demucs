@@ -34,6 +34,10 @@ def add_model_flags(parser):
                        help="Pretrained model name or signature. Default is mdx_extra_q.")
     parser.add_argument("--repo", type=Path,
                         help="Folder containing all pre-trained models for use with -n.")
+    parser.add_argument("--list-sub-models", action="store_true",
+                        help="List model names if we are having a bag of models. Then exit.")
+    parser.add_argument("--skip-sub-model", action="append",
+                        help="Skip a model by its name if we are having a bag of models. You can specify this many times.")
 
 
 def get_model(name: str,

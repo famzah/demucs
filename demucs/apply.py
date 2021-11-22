@@ -116,7 +116,7 @@ def tensor_chunk(tensor_or_chunk):
 
 
 def apply_model(model, mix, device, shifts=1, split=True,
-                overlap=0.25, transition_power=1., progress=False):
+                overlap=0.25, transition_power=1., progress=False, skip_bag_model_names=None):
     """
     Apply model to a given mixture.
 
@@ -136,7 +136,11 @@ def apply_model(model, mix, device, shifts=1, split=True,
         # are different for each model.
         estimates = 0
         totals = [0] * len(model.sources)
-        for sub_model, weight in zip(model.models, model.weights):
+        for sub_model, weight, model_name in zip(model.models, model.weights, model.sources):
+            print(f"{model_name}:")
+            if skip_bag_model_names and model_name in skip_bag_model_names:
+                print(f'.. skipped by --skip-sub-model')
+                continue
             out = apply_model(
                 sub_model, mix, device,
                 shifts=shifts, split=split, overlap=overlap,

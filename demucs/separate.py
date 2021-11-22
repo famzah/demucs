@@ -98,6 +98,9 @@ def main():
     if isinstance(model, BagOfModels):
         print(f"Selected model is a bag of {len(model.models)} models. "
               "You will see that many progress bars per track.")
+        if args.list_sub_models:
+            print("Sub-model names: " + ", ".join(model.sources) + ".")
+            return # exit
     model.to(args.device)
     model.eval()
 
@@ -117,12 +120,17 @@ def main():
         ref = wav.mean(0)
         wav = (wav - ref.mean()) / ref.std()
         sources = apply_model(model, wav[None], args.device, shifts=args.shifts, split=args.split,
-                              overlap=args.overlap, progress=True)[0]
-        sources = sources * ref.std() + ref.mean()
+                              overlap=args.overlap, progress=True,
+                              skip_bag_model_names=args.skip_sub_model)[0]
 
         track_folder = out / track.name.rsplit(".", 1)[0]
         track_folder.mkdir(exist_ok=True)
         for source, name in zip(sources, model.sources):
+            if name in args.skip_sub_model:
+                continue
+
+            source = source * ref.std() + ref.mean()
+
             stem = str(track_folder / name)
             if args.mp3:
                 stem += ".mp3"
